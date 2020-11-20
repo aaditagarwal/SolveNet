@@ -28,7 +28,7 @@ class Capture(BoxLayout):
    
     def onCameraClick(self, *args):
         timest = time.strftime("%Y%m%d-%H%M%S")
-        self.cameraObject.export_to_png(os.path.join("D:/Git/SolveNet/captures", ("capture_"+timest+".png")))
+        self.cameraObject.export_to_png(os.path.join("./gui/captures", ("capture_"+timest+".png")))
 
     def go_home(self, instance):
         self.sn_root.go_home()
