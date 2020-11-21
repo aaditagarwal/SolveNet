@@ -12,9 +12,12 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from gui.home import Home
 from gui.upload_img import Upload
 from gui.capture_img import Capture
+from gui.about_us import About
 
 class SolveNet(App):
     def build(self):
+        #from kivy.core.window import Window
+        #Window.clearcolor = (1, 1, 1, 1)
         self.screen_manager = ScreenManager()
 
         self.home_ = Home(sn_root)
@@ -32,8 +35,13 @@ class SolveNet(App):
         screen.add_widget(self.capture_img_)
         self.screen_manager.add_widget(screen)
 
+        self.about_ = About(sn_root)
+        screen = Screen(name="About")
+        screen.add_widget(self.about_)
+        self.screen_manager.add_widget(screen)
+
         return self.screen_manager
-    
+
     def go_upload(self, *_):
         print("GOING TO UPLOAD")
         self.screen_manager.transition.direction = 'left'
@@ -45,10 +53,15 @@ class SolveNet(App):
         self.screen_manager.current = "Capture"
 
     def go_home(self, *_):
-    	print("GOING HOME")
-    	self.screen_manager.transition.direction = 'left'
-    	self.screen_manager.current = "Home"
+        print("GOING HOME")
+        self.screen_manager.transition.direction = 'left'
+        self.screen_manager.current = "Home"
     
+    def go_about(self, *_):
+        print("READING ABOUT THE PROJECT")
+        self.screen_manager.transition.direction = 'left'
+        self.screen_manager.current = "About"
+
 if __name__ == "__main__":
     sn_root = SolveNet()
     sn_root.run()

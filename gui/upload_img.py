@@ -21,9 +21,9 @@ class Upload(GridLayout):
         self.sn_root = sn_root
         self.cols = 2
 
-        self.home_button = Button(text="Home")
+        self.home_button = Button(text="Home", size_hint=(1, .35))
         self.home_button.bind(on_press=self.go_home)
-        self.select_button = Button(text="Select")
+        self.select_button = Button(text="Select", size_hint=(0.5, .35))
         self.select_button.bind(on_press=self.select_path)
         self.add_widget(self.home_button)
         self.add_widget(self.select_button)
