@@ -13,6 +13,15 @@ from skimage import color
 from skimage.segmentation import slic
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+#Keras support channel first (1,28,28) only
+keras.backend.set_image_data_format("channels_first")
+
+#Load Model
+try:
+    model = keras.models.load_model('./../weights/DCNN_10AD_sy (1).h5', compile=False)
+except Exception as e:
+    print('Model couldnot be loaded',e)
+
 #Suppressing warning
 def warn(*args, **kwargs):
     pass

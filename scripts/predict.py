@@ -5,9 +5,9 @@ from skimage import io
 from skimage.util import img_as_float
 from skimage.segmentation.slic_superpixels import slic
 
-from processing import slic_segmentation
-from processing import extract_line
-from processing import text_segment
+from .processing import slic_segmentation
+from .processing import extract_line
+from .processing import text_segment
 
 keras.backend.set_image_data_format("channels_first")
 
