@@ -103,9 +103,9 @@ def extract_line(image, beta=0.7, alpha=0.002):
     
     # Find the contours
     if(cv2.__version__ == '3.3.1'): 
-        contours,hierarchy = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours,hierarchy = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-        contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     cont_thresh = find_good_contours_thres(contours, alpha=alpha)
 
@@ -337,11 +337,11 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     
     # Find the contours -  To check whether its disjoint character or noise
   
-    contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    _,contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     if(len(contours_tmp) > 1):
         # Find the contours
-        contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         #Creating a mask of only zeros  
         mask = np.ones(gray.shape[:2], dtype="uint8") * 0
         # Find the index of the largest contour
@@ -387,9 +387,9 @@ def text_segment(Y1,Y2,X1,X2, dict_clean,\
     
     # Find the contours
     if(cv2.__version__ == '3.3.1'):
-        contours,hierarchy = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours,hierarchy = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-        contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     ct_th = find_good_contours_thres(contours, alpha=0.005)
     cnts = []
@@ -448,7 +448,7 @@ def text_segment(Y1,Y2,X1,X2, dict_clean,\
     df_char.apply(lambda c: cv2.putText(img, c['pred'], (c['X1']-10,35), cv2.FONT_HERSHEY_SIMPLEX,  
                    1.5,(147,96,247), 3, cv2.LINE_AA), axis=1) 
     	  
-    return [df_char]
+    return df_char
 
 #--------------------------------------------------------------------------------#
 # supported operators

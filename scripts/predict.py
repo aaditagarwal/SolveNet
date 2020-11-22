@@ -42,19 +42,6 @@ def run(img_source):
                  row['x1'],row['x2'], dict_clean_img), axis=1))
 
     df_chars = pd.DataFrame(result)
-    
-    df_chars.columns = ['char_df']
-
-    char_area_list = []
-    df_chars['char_df'].apply(lambda d: char_area_list.append(list(d['area'])))
-
-    #Area based threshold for detecting and removing noises
-    gamma = 0
-    max_ar = max([max(i) for i in char_area_list])
-    ar_thresh = max_ar*gamma
-
-    #Keeping only those characters whose area of contours is above area threshold
-    df_chars['char_df'] = df_chars['char_df'].apply(lambda d: d[d.area > ar_thresh])
 
     box_img = dict_clean_img['r'] #For Processing B/W image
     box_img = cv2.cvtColor(box_img, cv2.COLOR_GRAY2BGR)
