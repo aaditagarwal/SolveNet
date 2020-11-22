@@ -32,8 +32,6 @@ def run(img_source):
     df = pd.DataFrame([y1s,y2s,x1s,x2s]).transpose()
     df.columns = ['y1','y2','x1','x2']
 
-    df_lines= pd.concat([df_lines, df])
-
     dict_clean_img.update({"r":cleaned_orig})
     dict_img.update({"r":img})
 
@@ -55,14 +53,13 @@ def run(img_source):
     df_chars['char_df'] = df_chars['char_df'].apply(lambda d: d[d.area > ar_thresh])
 
     box_img = dict_clean_img['r'] #For Processing B/W image
-    box_img_1 = dict_img['r'] #For saving results
     box_img = cv2.cvtColor(box_img, cv2.COLOR_GRAY2BGR)
 
     df = df_chars.copy()
         
     df['char_df'].apply(lambda d: d.apply(lambda c: cv2.rectangle(box_img, \
-        (c['X1'],c['Y1']),(c['X2'], c['Y2']),(255*(c['exp']==1),180,0),2+(2*c['exp'])), axis=1 ) )
+        (c['X1'],c['Y1']),(c['X2'], c['Y2']),(255*(c['exp']==1),180,0),2+(2*c['exp'])), axis=1))
     
-    df['line_status'] = df['char_df'].apply(lambda d: evaluate(d[["pred","exp","pred_proba"]]))
+    ans = df['char_df'].apply(lambda d: evaluate(d[["pred","exp","pred_proba"]]))
     
-    return df
+    return df, ans, box_img

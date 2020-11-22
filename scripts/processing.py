@@ -1,5 +1,4 @@
 import re
-import os   
 import cv2
 import ast
 import math
@@ -463,22 +462,11 @@ def eval_(node):
         raise TypeError(node)
 
 #--------------------------------------------------------------------------------#
-def eval_expr(expr):
-    """
-    >>> eval_expr('2^6')
-    4
-    >>> eval_expr('2**6')
-    64
-    >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
-    -5.0
-    """
-    return eval_(ast.parse(expr, mode='eval').body)
-
-#--------------------------------------------------------------------------------#
 def evaluate(df):
-    '''Function to evaluate mathematical equation and give bool output
-    Input: Dataframe
-           Values
+    '''
+    Function to evaluate mathematical equation and give bool output
+    Input:
+        Dataframe
     Output:
         Boolean T/F
     '''    
@@ -494,16 +482,6 @@ def evaluate(df):
             for s in matchesN:
                 pred = pred.replace(s,'')       
                 
-            
-        #looking for broken 5's
-        matches5 = re.findall(r'5\*\*-\D*', pred)
-        if(len(matches5) > 0):
-            for s in matches5:
-                sn = s.split('5**-')
-                snew = sn[0]+'5'+sn[1]
-                pred = pred.replace(s,snew)  
-
-        
         #This except block is fired when brackets are un necessarily used 
         #while writing the answerscripts and in strings
         matchesB_left = re.findall(r'\d\(\d', pred)
@@ -520,7 +498,7 @@ def evaluate(df):
                 snew = sn[0]+')*'+sn[1]
                 pred = pred.replace(s,snew) 
         
-        ans = eval_expr(pred)
+        ans = eval_(ast.parse(pred, mode='eval').body)
 
     except Exception as e:
         print(e)
