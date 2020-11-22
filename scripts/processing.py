@@ -18,7 +18,7 @@ keras.backend.set_image_data_format("channels_first")
 
 #Load Model
 try:
-    model = keras.models.load_model('./../weights/DCNN_10AD_sy (1).h5', compile=False)
+    model = keras.models.load_model('./../weights/DCNN_10AD_sy.h5', compile=False)
 except Exception as e:
     print('Model couldnot be loaded',e)
 
@@ -444,3 +444,86 @@ def text_segment(Y1,Y2,X1,X2, dict_clean,\
                    1.5,(147,96,247), 3, cv2.LINE_AA), axis=1) 
     	  
     return [df_char]
+
+#--------------------------------------------------------------------------------#
+# supported operators
+operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+             ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
+             ast.USub: op.neg}
+
+#--------------------------------------------------------------------------------#
+def eval_(node):
+    if isinstance(node, ast.Num): # <number>
+        return node.n
+    elif isinstance(node, ast.BinOp): # <left> <operator> <right>
+        return operators[type(node.op)](eval_(node.left), eval_(node.right))
+    elif isinstance(node, ast.UnaryOp): # <operator> <operand> e.g., -1
+        return operators[type(node.op)](eval_(node.operand))
+    else:
+        raise TypeError(node)
+
+#--------------------------------------------------------------------------------#
+def eval_expr(expr):
+    """
+    >>> eval_expr('2^6')
+    4
+    >>> eval_expr('2**6')
+    64
+    >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
+    -5.0
+    """
+    return eval_(ast.parse(expr, mode='eval').body)
+
+#--------------------------------------------------------------------------------#
+def evaluate(df):
+    '''Function to evaluate mathematical equation and give bool output
+    Input: Dataframe
+           Values
+    Output:
+        Boolean T/F
+    '''    
+    
+    try:#If BODMAS is correct and Mathematically equation is correct
+        pred = df["exp"].apply(lambda d: "**" if d==1 else "")
+        pred = "".join(list(pred+df["pred"]))
+        
+        #looking for non digits in the start of the string for 
+        #ignoring equal to's
+        matchesN = re.findall('^\-\-', pred)
+        if(len(matchesN) > 0):
+            for s in matchesN:
+                pred = pred.replace(s,'')       
+                
+            
+        #looking for broken 5's
+        matches5 = re.findall(r'5\*\*-\D*', pred)
+        if(len(matches5) > 0):
+            for s in matches5:
+                sn = s.split('5**-')
+                snew = sn[0]+'5'+sn[1]
+                pred = pred.replace(s,snew)  
+
+        
+        #This except block is fired when brackets are un necessarily used 
+        #while writing the answerscripts and in strings
+        matchesB_left = re.findall(r'\d\(\d', pred)
+        matchesB_right = re.findall(r'\d\)\d', pred)
+        
+        if(len(matchesB_left) > 0 or len(matchesB_right) > 0):
+            for s in matchesB_left:
+                sn = s.split('(')
+                snew = sn[0]+'*('+sn[1]
+                pred = pred.replace(s,snew)    
+                
+            for s in matchesB_right:
+                sn = s.split(')')
+                snew = sn[0]+')*'+sn[1]
+                pred = pred.replace(s,snew) 
+        
+        ans = eval_expr(pred)
+
+    except Exception as e:
+        print(e)
+        return False
+    
+    return ans
