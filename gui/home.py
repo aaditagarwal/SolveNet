@@ -20,6 +20,9 @@ class Home(FloatLayout):
         self.about_button = Button(text="About")
         self.about_button.bind(on_press=self.read_about)
 
+        self.exit_button = Button(text="Exit")
+        self.exit_button.bind(on_press=self.exit_app)
+
         self.upload_option_button.size_hint = (0.25,0.25)
         self.upload_option_button.pos_hint = {'x':0.15, 'y':0.6}
 
@@ -27,11 +30,15 @@ class Home(FloatLayout):
         self.capture_option_button.pos_hint = {'x':0.6, 'y':0.6}
 
         self.about_button.size_hint = (0.25,0.1)
-        self.about_button.pos_hint = {'x':0.375, 'y':0.3}
+        self.about_button.pos_hint = {'x':0.15, 'y':0.3}
+
+        self.exit_button.size_hint = (0.25,0.1)
+        self.exit_button.pos_hint = {'x':0.6, 'y':0.3}
 
         self.add_widget(self.upload_option_button)
         self.add_widget(self.capture_option_button)
         self.add_widget(self.about_button)
+        self.add_widget(self.exit_button)
     
     def choose_upload(self, instance):
         self.sn_root.go_upload()
@@ -41,3 +48,6 @@ class Home(FloatLayout):
 
     def read_about(self, instance):
         self.sn_root.go_about()
+
+    def exit_app(self, instance):
+        self.sn_root.go_exit()

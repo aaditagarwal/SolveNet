@@ -8,6 +8,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen
+from sys import exit
 
 from gui.home import Home
 from gui.upload_img import Upload
@@ -61,6 +62,10 @@ class SolveNet(App):
         print("READING ABOUT THE PROJECT")
         self.screen_manager.transition.direction = 'left'
         self.screen_manager.current = "About"
+
+    def go_exit(self, *_):
+        print("EXITING APP")
+        exit()
 
 if __name__ == "__main__":
     sn_root = SolveNet()
