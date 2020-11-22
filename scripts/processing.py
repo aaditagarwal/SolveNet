@@ -1,4 +1,5 @@
 import re
+import os
 import cv2
 import ast
 import math
@@ -12,14 +13,19 @@ from skimage import color
 from skimage.segmentation import slic
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
 #Keras support channel first (1,28,28) only
 keras.backend.set_image_data_format("channels_first")
 
 #Load Model
 try:
-    model = keras.models.load_model('./../weights/DCNN_10AD_sy.h5', compile=False)
+    model = keras.models.load_model('/media/aadit/Data/Project/SolveNet/SolveNet/weights/DCNN_10AD_sy (1).h5', compile=False)
 except Exception as e:
-    print('Model couldnot be loaded',e)
+    print('Model could not be loaded ',e)
+else:
+    print('Model Successfully Loaded')
+
 
 #Suppressing warning
 def warn(*args, **kwargs):
@@ -97,9 +103,9 @@ def extract_line(image, beta=0.7, alpha=0.002):
     
     # Find the contours
     if(cv2.__version__ == '3.3.1'): 
-         xyz,contours,hierarchy = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hierarchy = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-        _, contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     cont_thresh = find_good_contours_thres(contours, alpha=alpha)
 
@@ -331,11 +337,11 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     
     # Find the contours -  To check whether its disjoint character or noise
   
-    _,contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     if(len(contours_tmp) > 1):
         # Find the contours
-        _,contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         #Creating a mask of only zeros  
         mask = np.ones(gray.shape[:2], dtype="uint8") * 0
         # Find the index of the largest contour
@@ -381,9 +387,9 @@ def text_segment(Y1,Y2,X1,X2, dict_clean,\
     
     # Find the contours
     if(cv2.__version__ == '3.3.1'):
-        xyz,contours,hierarchy = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hierarchy = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-         _, contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     ct_th = find_good_contours_thres(contours, alpha=0.005)
     cnts = []
