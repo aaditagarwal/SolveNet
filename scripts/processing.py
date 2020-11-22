@@ -15,8 +15,6 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
-#Keras support channel first (1,28,28) only
-keras.backend.set_image_data_format("channels_first")
 
 #Load Model
 try:
@@ -33,7 +31,7 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def slic_segmentation(img):
     '''
     Function to segment the text from the source image
@@ -44,7 +42,7 @@ def slic_segmentation(img):
     rgb_arr=color.label2rgb(segments, img, kind='avg')
     return rgb_arr
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def find_good_contours_thres(conts, alpha = 0.002):
     '''
     Function to find threshold of good contours on basis of 10% of maximum area
@@ -65,8 +63,8 @@ def find_good_contours_thres(conts, alpha = 0.002):
     
     return thres
 
-#--------------------------------------------------------------------------------#
-def extract_line(image, beta=0.7, alpha=0.002):
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+def extract_line(image, beta=0.7, alpha=0.002, show = False):
     '''
     Function to extracts the line from the image   
     Assumption : Sufficient gap b/w lines
@@ -75,6 +73,7 @@ def extract_line(image, beta=0.7, alpha=0.002):
         img (array): image array
         beta (0-1) : Parameter to differentiate line
         alpha (0-1) : Parameter to select good contours
+        show(bool) : to show figures or not
     output:
         uppers[diff_index]  : Upper points (x,y)
         lowers[diff_index]  : lower points(x,y)
@@ -87,10 +86,8 @@ def extract_line(image, beta=0.7, alpha=0.002):
     img[-h5:,:] = [255,255,255]
     img[:,:w5] = [255,255,255]
     img[:,-w5:] = [255,255,255]
-    
     #Converting image to gray
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
     #Binary thresholding and inverting at 127
     th, threshed = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV|cv2.THRESH_OTSU)
     
@@ -103,9 +100,9 @@ def extract_line(image, beta=0.7, alpha=0.002):
     
     # Find the contours
     if(cv2.__version__ == '3.3.1'): 
-        _,contours,hierarchy = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+         contours,hierarchy = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-        _,contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     cont_thresh = find_good_contours_thres(contours, alpha=alpha)
 
@@ -173,10 +170,42 @@ def extract_line(image, beta=0.7, alpha=0.002):
             col=col2
         cv2.rectangle(cleaned_orig_rec ,(0+10,left),(W-15,right),col,4)
         col_ct += 1
+        
+    if(show == True):
+        fig0 = plt.figure(figsize=(15,5))
+        ax1 = fig0.add_subplot(1,3,1)
+        ax1.set_title('Original Image')
+        ax1.imshow(img)
+        ax1.axis('off')
+        
+        ax2 = fig0.add_subplot(1,3,2)
+        ax2.set_title('Cleaned Image')
+        ax2.imshow(cleaned_img)
+        ax2.axis('off')
+        
+        ax3 = fig0.add_subplot(1,3,3)
+        ax3.set_title('Noises')
+        ax3.imshow(mask)
+        ax3.axis('off')
+        
+        fig0.suptitle('Denoising')
+        plt.show()
+    
+        fig1 = plt.figure(figsize=(15,5))
+        fig1.suptitle('Line Detection')
+        ax1 = fig1.add_subplot(1,2,1)
+        ax1.axis("off")
+        ax1.imshow(cleaned_orig)
+        
+        ax2 = fig1.add_subplot(1,2,2)    
+        ax2.axis("off")
+        ax2.imshow(cleaned_orig_rec)
+        
+        plt.show()
     
     return cleaned_orig, uppers[diff_index], lowers[diff_index]
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def sort_contours(cnts, method="left-to-right"):
     '''
     sort_contours : Function to sort contours
@@ -210,7 +239,8 @@ def sort_contours(cnts, method="left-to-right"):
 
     return (cnts, boundingBoxes)
 
-#--------------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def shift(img,sx,sy):
     '''
     Shift : Function to shift the image in given direction 
@@ -225,7 +255,7 @@ def shift(img,sx,sy):
     shifted = cv2.warpAffine(img,M,(cols,rows))
     return shifted
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def getBestShift(img):
     '''
     getBestShift : Function to calculate centre of mass and get the best shifts
@@ -241,7 +271,7 @@ def getBestShift(img):
 
     return shiftx,shifty
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def process_img (gray, resize_flag = 1, preproc = 0):
     '''
     process_img  : Function to pre process image for prediction
@@ -314,7 +344,7 @@ def process_img (gray, resize_flag = 1, preproc = 0):
     
     return grayS
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     '''
     predict  : Function to predict the character
@@ -337,11 +367,11 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     
     # Find the contours -  To check whether its disjoint character or noise
   
-    _,contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     if(len(contours_tmp) > 1):
         # Find the contours
-        _,contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         #Creating a mask of only zeros  
         mask = np.ones(gray.shape[:2], dtype="uint8") * 0
         # Find the index of the largest contour
@@ -365,16 +395,19 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     
     return c[ind]
 
-#--------------------------------------------------------------------------------#
-def text_segment(Y1,Y2,X1,X2, dict_clean,\
-                 acc_thresh = 0.60):
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+def text_segment(Y1,Y2,X1,X2, dict_clean,acc_thresh = 0.60, show = False):
     '''
     text_segment : Function to segment the characters
     Input:
         Box coordinates -X1,Y1,X2,Y2
+        box_num - name of box
+        line_name - name of line
         model - Deep Learning model to be used for prediction
         dict_clean - dictionary of clean box images
     Output :
+        box_num - name of box
+        line_name -name of line
         df_char - Dataframe of characters of that particular line
     '''
     img = dict_clean["r"][Y1:Y2,X1:X2].copy()
@@ -387,9 +420,9 @@ def text_segment(Y1,Y2,X1,X2, dict_clean,\
     
     # Find the contours
     if(cv2.__version__ == '3.3.1'):
-        _,contours,hierarchy = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours,hierarchy = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-        _,contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     ct_th = find_good_contours_thres(contours, alpha=0.005)
     cnts = []
@@ -447,16 +480,24 @@ def text_segment(Y1,Y2,X1,X2, dict_clean,\
            c['Y1'],c['X2'], c['Y2'], proba=True, acc_thresh=acc_thresh), axis=1 )
     df_char.apply(lambda c: cv2.putText(img, c['pred'], (c['X1']-10,35), cv2.FONT_HERSHEY_SIMPLEX,  
                    1.5,(147,96,247), 3, cv2.LINE_AA), axis=1) 
-    	  
-    return df_char
 
-#--------------------------------------------------------------------------------#
+    if(show == True):        
+        plt.figure(figsize=(15,8))   
+
+        plt.axis("on")
+        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        plt.show()
+    	  
+    return [df_char]
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # supported operators
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
              ast.USub: op.neg}
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def eval_(node):
     if isinstance(node, ast.Num): # <number>
         return node.n
@@ -467,7 +508,7 @@ def eval_(node):
     else:
         raise TypeError(node)
 
-#--------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def evaluate(df):
     '''
     Function to evaluate mathematical equation and give bool output
@@ -511,3 +552,39 @@ def evaluate(df):
         return False
     
     return ans
+
+def convert_dataframe(df):
+    count = 0    
+    X1 = []
+    X2 = []
+    Y1 = []
+    Y2 = []
+    Area = []
+    Exp = []
+    Prediction = []
+    Probability = []
+    length_array = len(df.values.tolist()[0]) + 1
+    for element in df.values.tolist()[0]:
+        count += 1
+        if (length_array - (count-1)) % 6 == 0:
+            if count%8 == 1:
+                X1.append(element)
+            elif count%8 == 2:
+                Y1.append(element)
+            elif count%8 == 3:
+                X2.append(element)
+            elif count%8 == 4:
+                Y2.append(element)
+            elif count%8 == 5:
+                Area.append(element)
+            elif count%8 == 6:
+                Exp.append(element)
+            elif count%8 == 7:
+                Prediction.appendd(element)
+            elif count%8 == 0:
+                Probability.append(element)
+    columns = ['X1','Y1','X2','Y2','area','exp','pred','pred_proba']
+    data = [X1,Y1,X2,Y2,Area,Exp,Prediction,Probability]
+    dataframe = pd.DataFrame(dict(list(zip(columns,data))))
+
+    return dataframe

@@ -2,19 +2,21 @@ import cv2
 import keras
 import numpy as np
 import pandas as pd
+from pandas.core.frame import DataFrame
 from skimage import io
 from skimage.util import img_as_float
 from skimage.segmentation.slic_superpixels import slic
 
-from .processing import slic_segmentation
+from .processing import convert_dataframe, slic_segmentation
 from .processing import extract_line
 from .processing import text_segment
 from .processing import evaluate
+from .processing import convert_dataframe
 
 keras.backend.set_image_data_format("channels_first")
 
 def run(img_source):
-    source_img = img_as_float(io.imread(img_source))
+    source_img = io.imread(img_source)
     img = slic_segmentation(source_img)
     print('Image Segmented')
     img = img.astype(np.uint8)
@@ -42,6 +44,7 @@ def run(img_source):
                  row['x1'],row['x2'], dict_clean_img), axis=1))
 
     df_chars = pd.DataFrame(result)
+    df_chars.columns = ['char_df']
 
     box_img = dict_clean_img['r'] #For Processing B/W image
     box_img = cv2.cvtColor(box_img, cv2.COLOR_GRAY2BGR)
@@ -53,5 +56,7 @@ def run(img_source):
     
     ans = df['char_df'].apply(lambda d: evaluate(d[["pred","exp","pred_proba"]]))
     print('Expression Evaluated')
-    
-    return df, ans, box_img
+
+    dataframe = convert_dataframe(df)
+
+    return dataframe, ans, box_img

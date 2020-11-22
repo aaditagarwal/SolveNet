@@ -3,6 +3,6 @@ from skimage import io
 
 df , ans , img = run('~/Downloads/WhatsApp Image 2020-11-22 at 19.45.12.jpeg')
 
-print(df)
+print(df.head(5))
 print('Answer: ',ans)
-#io.imsave('~/Downloads/zx.png', img)
+io.imsave('~/Downloads/zx.png', img)
