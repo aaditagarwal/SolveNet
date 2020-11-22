@@ -18,16 +18,22 @@ class Capture(FloatLayout):
         self.cameraObject.pos_hint = {'x':0, 'y':0.2}
 
         anchor1 = AnchorLayout(anchor_x='left', anchor_y='bottom')
-        home_button = Button(text="Home", size_hint=(0.5, .30))
+        home_button = Button(text="Home", size_hint=(0.33, .30))
         home_button.bind(on_press=self.go_home)
         anchor1.add_widget(home_button)
         self.add_widget(anchor1)
 
-        anchor2 = AnchorLayout(anchor_x='right', anchor_y='bottom')
-        cameraClick = Button(text="Take Photo", size_hint=(0.5, .30))
+        anchor2 = AnchorLayout(anchor_x='center', anchor_y='bottom')
+        cameraClick = Button(text="Take Photo", size_hint=(0.33, .30))
         cameraClick.bind(on_press=self.onCameraClick)
         anchor2.add_widget(cameraClick)
         self.add_widget(anchor2)
+
+        anchor3 = AnchorLayout(anchor_x='right', anchor_y='bottom')
+        cameraClick = Button(text="Evaluate", size_hint=(0.33, .30))
+        cameraClick.bind(on_press=self.go_results)
+        anchor3.add_widget(cameraClick)
+        self.add_widget(anchor3)
 
         self.add_widget(self.cameraObject)
    
@@ -37,3 +43,6 @@ class Capture(FloatLayout):
 
     def go_home(self, instance):
         self.sn_root.go_home()
+
+    def go_results(self, instance):
+        self.sn_root.go_results()

@@ -24,18 +24,20 @@ class Upload(GridLayout):
         self.home_button = Button(text="Home", size_hint=(1, .35))
         self.home_button.bind(on_press=self.go_home)
         self.select_button = Button(text="Select", size_hint=(0.5, .35))
-        self.select_button.bind(on_press=self.select_path)
+        self.select_button.bind(on_press=self.go_results)
         self.add_widget(self.home_button)
         self.add_widget(self.select_button)
 
     def selected(self, filename):
         self.ids.image.source = filename[0]
-        global image_path
         image_path = filename[0]
+        f = open("image_path.txt", "w")
+        f.write(image_path)
+        f.close()
     
     def go_home(self, instance):
         self.sn_root.go_home()
 
-    def select_path(self, filename):
-        return image_path
+    def go_results(self, instance):
+        self.sn_root.go_results()
 

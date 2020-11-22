@@ -14,6 +14,7 @@ from gui.home import Home
 from gui.upload_img import Upload
 from gui.capture_img import Capture
 from gui.about_us import About
+from gui.results_page import Results
 
 class SolveNet(App):
     def build(self):
@@ -41,6 +42,11 @@ class SolveNet(App):
         screen.add_widget(self.about_)
         self.screen_manager.add_widget(screen)
 
+        self.results_ = Results(sn_root)
+        screen = Screen(name="Results")
+        screen.add_widget(self.results_)
+        self.screen_manager.add_widget(screen)
+
         return self.screen_manager
 
     def go_upload(self, *_):
@@ -63,6 +69,11 @@ class SolveNet(App):
         self.screen_manager.transition.direction = 'left'
         self.screen_manager.current = "About"
 
+    def go_results(self, *_):
+        print("GOING TO RESULTS")
+        self.screen_manager.transition.direction = 'right'
+        self.screen_manager.current = "Results"
+
     def go_exit(self, *_):
         print("EXITING APP")
         exit()
@@ -70,3 +81,6 @@ class SolveNet(App):
 if __name__ == "__main__":
     sn_root = SolveNet()
     sn_root.run()
+    f = open("image_path.txt", "w")
+    f.write("")
+    f.close()
