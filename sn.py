@@ -15,8 +15,8 @@ from gui.upload_img import Upload
 from gui.capture_img import Capture
 from gui.about_us import About
 from gui.results_page import Results
-from scripts.test import run
-#from scripts.predict import run
+#from scripts.test import run
+from predict import run
 
 class SolveNet(App):
     def build(self):
