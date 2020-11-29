@@ -54,5 +54,7 @@ def run(img_source):
     print('Expression Evaluated')
 
     dataframe = convert_df(df)
+    result_img_source = './../result_images/image.jpeg'
+    cv2.imwrite(result_img_source,box_img)
 
-    return dataframe, ans, box_img
+    return dataframe, ans, result_img_source

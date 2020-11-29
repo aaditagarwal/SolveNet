@@ -21,7 +21,7 @@ from keras.applications.imagenet_utils import preprocess_input, decode_predictio
 
 #Load Model
 try:
-    model = keras.models.load_model('./../weights/', compile=False)
+    model = keras.models.load_model('./../weights/DCNN_10AD_sy_better_pool.h5', compile=False)
 except Exception as e:
     print('Model could not be loaded ',e)
 else:
