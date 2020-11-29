@@ -15,6 +15,7 @@ from gui.upload_img import Upload
 from gui.capture_img import Capture
 from gui.about_us import About
 from gui.results_page import Results
+from scripts.test import run
 
 class SolveNet(App):
     def build(self):
@@ -77,10 +78,11 @@ class SolveNet(App):
     def go_exit(self, *_):
         print("EXITING APP")
         exit()
+    
+    def rrun(self, img_path, *_):
+        df, ans, img = run(img_path)
+        return df, ans, img
 
 if __name__ == "__main__":
     sn_root = SolveNet()
     sn_root.run()
-    f = open("image_path.txt", "w")
-    f.write("")
-    f.close()

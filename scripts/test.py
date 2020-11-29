@@ -1,16 +1,15 @@
 import cv2
-import keras
 import numpy as np
 import pandas as pd
-from skimage import io
-from skimage.util import img_as_float
-from skimage.segmentation.slic_superpixels import slic
+import time
 
-from processing import slic_segmentation
-from processing import extract_line
-from processing import text_segment
-from processing import evaluate
-
-from predict import run
-
-run("D:/123.png")
+def run(direc): 
+	ans = "75"
+	path = r"D:\123.png"
+	print(path)
+	#src = cv2.imread(path) 
+	#img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY ) 
+	df = pd.DataFrame(np.random.rand(10,10))
+	print("DIREC:"+direc)
+	img = direc
+	return df, ans, img

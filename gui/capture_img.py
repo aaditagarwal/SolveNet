@@ -6,6 +6,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
 import os
 import time
+import glob
 
 class Capture(FloatLayout):
     def __init__(self, sn_root, **kwargs):
@@ -39,10 +40,13 @@ class Capture(FloatLayout):
    
     def onCameraClick(self, *args):
         timest = time.strftime("%Y%m%d-%H%M%S")
-        self.cameraObject.export_to_png(os.path.join("./gui/captures", ("capture_"+timest+".png")))
+        self.cameraObject.export_to_png(os.path.join(".\\gui\\captures", ("capture_"+timest+".png")))
 
     def go_home(self, instance):
         self.sn_root.go_home()
 
     def go_results(self, instance):
         self.sn_root.go_results()
+        list_of_files = glob.glob('D:\\SolveNet\\gui\\captures\\*.png') # * means all if need specific format then *.csv
+        latest_file = max(list_of_files, key=os.path.getctime)
+        self.sn_root.results_.print_results(latest_file)

@@ -30,14 +30,12 @@ class Upload(GridLayout):
 
     def selected(self, filename):
         self.ids.image.source = filename[0]
-        image_path = filename[0]
-        f = open("image_path.txt", "w")
-        f.write(image_path)
-        f.close()
+        self.sel_image_path = filename[0]
     
     def go_home(self, instance):
         self.sn_root.go_home()
 
     def go_results(self, instance):
         self.sn_root.go_results()
+        self.sn_root.results_.print_results(self.sel_image_path)
 
