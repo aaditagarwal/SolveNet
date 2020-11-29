@@ -7,24 +7,20 @@ from skimage import io
 from skimage.util import img_as_float
 from skimage.segmentation.slic_superpixels import slic
 
-from .processing import convert_dataframe, slic_segmentation
-from .processing import extract_line
-from .processing import text_segment
-from .processing import evaluate
-from .processing import convert_dataframe
+from processing import extract_line
+from processing import text_segment
+from processing import evaluate
+from processing import convert_df
+
 
 keras.backend.set_image_data_format("channels_first")
 
 def run(img_source):
-    source_img = io.imread(img_source)
-    img = slic_segmentation(source_img)
-    print('Image Segmented')
-    img = img.astype(np.uint8)
+    img = io.imread(img_source)
 
     #Global Variable
     dict_clean_img = {} #BINARY IMAGE DICTIONAY
     dict_img = {} #ORIGINAL IMAGE DICTIONARY
-    df_lines = pd.DataFrame()
 
     #Extracting lines present in the boxes
     H,W = img.shape[:2]
@@ -57,6 +53,6 @@ def run(img_source):
     ans = df['char_df'].apply(lambda d: evaluate(d[["pred","exp","pred_proba"]]))
     print('Expression Evaluated')
 
-    dataframe = convert_dataframe(df)
+    dataframe = convert_df(df)
 
     return dataframe, ans, box_img

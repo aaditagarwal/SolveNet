@@ -12,13 +12,16 @@ import operator as op
 from skimage import color
 from skimage.segmentation import slic
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing import image
+from keras.applications.imagenet_utils import preprocess_input, decode_predictions
 
-os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
+#os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 
 #Load Model
 try:
-    model = keras.models.load_model('/media/aadit/Data/Project/SolveNet/SolveNet/weights/DCNN_10AD_sy (1).h5', compile=False)
+    model = keras.models.load_model('./../weights/', compile=False)
 except Exception as e:
     print('Model could not be loaded ',e)
 else:
@@ -102,7 +105,7 @@ def extract_line(image, beta=0.7, alpha=0.002, show = False):
     if(cv2.__version__ == '3.3.1'): 
          contours,hierarchy = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-        contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours, _ = cv2.findContours(dilation,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     cont_thresh = find_good_contours_thres(contours, alpha=alpha)
 
@@ -272,77 +275,15 @@ def getBestShift(img):
     return shiftx,shifty
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-def process_img (gray, resize_flag = 1, preproc = 0):
-    '''
-    process_img  : Function to pre process image for prediction
-    argument:
-        gray (Matrix (np.uint8))  : image of character to be resized and processed
-        resize_flag               : method used for resizing image
-        preproc (method [bool])   : 0 : No erosion DIlation, 1 : Erosion, Dilation
-    output:
-        grayS (Matrix (0-1))      : Normalised image of character resized and processed
-    
-    '''    
-    gray = gray.copy()
-    
-    #Image Pre Processing
-    if (preproc == 0):
-        gray = cv2.GaussianBlur(gray,(7,7),0)
-    else :
-        kernel = np.ones((3,3), np.uint8)
-        gray = cv2.dilate(gray, kernel, iterations=1)    
-        gray = cv2.GaussianBlur(gray,(5,5),1)
-        gray = cv2.dilate(gray, kernel, iterations=2)
-        gray = cv2.erode(gray, kernel,iterations=2)    
-    
-    #Removing rows and columns where all the pixels are black
-    while np.sum(gray[0]) == 0:
-        gray = gray[1:]
 
-    while np.sum(gray[:,0]) == 0:
-        gray = np.delete(gray,0,1)
-
-    while np.sum(gray[-1]) == 0:
-        gray = gray[:-1]
-
-    while np.sum(gray[:,-1]) == 0:
-        gray = np.delete(gray,-1,1)
-
-    rows,cols = gray.shape
-    
-    if(resize_flag) == 1:
-        interpolation=cv2.INTER_AREA
-    else:
-        interpolation=cv2.INTER_CUBIC
-    # Making the aspect ratio same before re-sizing
-    if rows > cols:
-        factor = 20.0/rows
-        rows = 20
-        cols = int(round(cols*factor))
-        # first cols than rows
-        gray = cv2.resize(gray, (cols,rows),interpolation=interpolation)
-    else:
-        factor = 20.0/cols
-        cols = 20
-        rows = int(round(rows*factor))
-        # first cols than rows
-        gray = cv2.resize(gray, (cols, rows),interpolation=interpolation)
-   
-    # Padding to a 28 * 28 image
-    colsPadding = (int(math.ceil((28-cols)/2.0)),int(math.floor((28-cols)/2.0)))
-    rowsPadding = (int(math.ceil((28-rows)/2.0)),int(math.floor((28-rows)/2.0)))
-    gray = np.lib.pad(gray,(rowsPadding,colsPadding),'constant')
-    
-    # Get the best shifts
-    shiftx,shifty = getBestShift(gray)
-    shifted = shift(gray,shiftx,shifty)
-    grayS = shifted
-    grayS = grayS.reshape(1,1,28,28)
-    
-    #Normalize the image
-    grayS = grayS/255
-    
-    return grayS
+def process_img (gray):
+    source_img=cv2.cvtColor(gray,cv2.COLOR_GRAY2RGB)
+    x = image.img_to_array(source_img)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
+    img=slic_segmentation(x[0])
+    img=np.resize(img,(1,227,227,3))
+    return img
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
@@ -358,7 +299,7 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     
     '''
     gray = img[y1:y2, x1:x2]
-
+    gray = cv2.resize(gray, (227,227))
     # Steps to remove noises in image due to cropping
     temp = gray.copy()
     
@@ -367,11 +308,11 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     
     # Find the contours -  To check whether its disjoint character or noise
   
-    contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    _,contours_tmp,_ = cv2.findContours(temp_tmp,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     if(len(contours_tmp) > 1):
         # Find the contours
-        contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours,_= cv2.findContours(gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         #Creating a mask of only zeros  
         mask = np.ones(gray.shape[:2], dtype="uint8") * 0
         # Find the index of the largest contour
@@ -383,11 +324,11 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
         #Drawing those contours which are noises and then taking bitwise and
         gray = cv2.bitwise_and(temp, temp, mask=mask)
         
-    grayN = process_img (gray, resize_flag = 0)
+    grayN = process_img (gray)
     
-    classes = model.predict(grayN, batch_size=2)
+    classes = model.predict(grayN)
     ind = np.argmax(classes)
-    c = ['0','1','2','3','4','5','6','7','8','9','+','-','*','(',')']
+    c = ['0','1','2','3','4','5','6','7','8','9','+','-','times','forward_slash','(',')','{','}','[',']','e','i','in','pi']
 
     
     if (proba == True):
@@ -396,7 +337,7 @@ def predict(img,x1,y1,x2,y2, proba = False, acc_thresh = 0.60):
     return c[ind]
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-def text_segment(Y1,Y2,X1,X2, dict_clean,acc_thresh = 0.60, show = False):
+def text_segment(Y1,Y2,X1,X2, dict_clean,acc_thresh = 0.60, show =True):
     '''
     text_segment : Function to segment the characters
     Input:
@@ -422,7 +363,7 @@ def text_segment(Y1,Y2,X1,X2, dict_clean,acc_thresh = 0.60, show = False):
     if(cv2.__version__ == '3.3.1'):
         contours,hierarchy = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     else:
-        contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        _,contours, _  = cv2.findContours(erosion,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         
     ct_th = find_good_contours_thres(contours, alpha=0.005)
     cnts = []
@@ -553,7 +494,7 @@ def evaluate(df):
     
     return ans
 
-def convert_dataframe(df):
+def convert_df(df):
     count = 0    
     X1 = []
     X2 = []
