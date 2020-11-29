@@ -47,6 +47,6 @@ class Capture(FloatLayout):
 
     def go_results(self, instance):
         self.sn_root.go_results()
-        list_of_files = glob.glob('D:\\SolveNet\\gui\\captures\\*.png') # * means all if need specific format then *.csv
+        list_of_files = glob.glob('.\\gui\\captures\\*.png') # * means all if need specific format then *.<format>
         latest_file = max(list_of_files, key=os.path.getctime)
         self.sn_root.results_.print_results(latest_file)

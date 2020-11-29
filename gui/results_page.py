@@ -15,39 +15,29 @@ class Results(GridLayout):
         self.sn_root = sn_root
         self.cols = 2
 
-        #dfs = df.to_string()
-        #f = open("image_path.txt", "r")
-        #image_path = f.read()
-
-        self.ans_text = Label()
-        #self.ans_text.text = ans
+        self.ans_text = Label(markup=True)
         
-
         self.df_text = Label()
-        #self.df_text.text = dfs
-        #self.df_text.text = "A"
         
-
-        #self.pro_image = Image(source=r'D:\123.png')
         self.pro_image = Image()
         
-
-        self.home_button = Button(text="Home", size_hint=(0.3, 0.3))
-        self.home_button.bind(on_press=self.go_home)
-
+        self.button_layout = AnchorLayout(anchor_x='left', anchor_y='bottom')
+        home_button = Button(text="Home", size_hint=(0.3, .3))
+        home_button.bind(on_press=self.go_home)
+        self.button_layout.add_widget(home_button)
         
-
     def go_home(self, instance):
         self.sn_root.go_home()
 
     def print_results(self, direc):
         df, ans, img = self.sn_root.rrun(img_path=direc)
         dfs = df.to_string()
-        self.ans_text.text = ans
+        self.ans_text.text = '[size=40][b]'+ans+'[/b][/size]'+"           "
         self.df_text.text = dfs
         self.pro_image.source = img
         self.add_widget(self.ans_text)
         self.add_widget(self.df_text)
+        self.add_widget(self.button_layout)
         self.add_widget(self.pro_image)
-        self.add_widget(self.home_button)
+
        

@@ -5,8 +5,6 @@ import time
 
 def run(direc): 
 	ans = "75"
-	path = r"D:\123.png"
-	print(path)
 	#src = cv2.imread(path) 
 	#img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY ) 
 	df = pd.DataFrame(np.random.rand(10,10))
